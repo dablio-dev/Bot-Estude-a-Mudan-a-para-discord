@@ -1,7 +1,11 @@
+import os
 import discord
 from discord.ext import commands, tasks
 from datetime import time
-
+from dotenv import load_dotenv
+load_dotenv()
+token = str(os.getenv('token_discord'))
+canal_geral = os.getenv('canal_geral')
 intents = discord.Intents.all()
 bot = commands.Bot('.', intents = intents)
 
@@ -20,7 +24,7 @@ async def on_message(msg:discord.Message):
 
 @bot.event
 async def on_member_join(membro:discord.Member):
-    canal = bot.get_channel(1564776967188774942)
+    canal = bot.get_channel(canal_geral)
     await canal.send(f'Membro {membro.mention} entrou neste servidor')
 
 @bot.event
@@ -54,4 +58,4 @@ async def enviar_mensagem():
     canal = bot.get_channel(1564782422850277466)
     await canal.send('Hora de estudar, repetição ativada')
 
-bot.run('')
+bot.run(token)
