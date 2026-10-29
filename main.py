@@ -1,61 +1,49 @@
-import os
 import discord
-from discord.ext import commands, tasks
-from datetime import time
+import os
 from dotenv import load_dotenv
+from discord.ext import commands, tasks
 load_dotenv()
-token = str(os.getenv('token_discord'))
-canal_geral = os.getenv('canal_geral')
+token = os.getenv('token_discord')
+canal_comandos = int(os.getenv('canal_comandos'))
+canal_sugestao = int(os.getenv('canal_sugestao'))
+
 intents = discord.Intents.all()
-bot = commands.Bot('.', intents = intents)
+bot = commands.Bot('!sugerir', intents = intents)
 
 @bot.event
 async def on_ready():
-    enviar_mensagem.start()
-    print('Bot inicializado com sucesso!')
+    print('Bot carregado com sucesso!')
 
-@bot.event
-async def on_message(msg:discord.Message):
-    if msg.author.bot:
+@bot.command()
+async def _privado(ctx:commands.Context):
+    canal = ctx.channel.id
+    if canal != canal_comandos:
         return
-    await bot.process_commands(msg)
-    # await msg.reply(f'Um usuário {msg.author.mention} enviou uma mensagem no canal {msg.channel.name}!')
-
-
-@bot.event
-async def on_member_join(membro:discord.Member):
-    canal = bot.get_channel(canal_geral)
-    await canal.send(f'Membro {membro.mention} entrou neste servidor')
-
-@bot.event
-async def on_reaction_add(reacao:discord.Reaction, membro:discord.Member):
-    await reacao.message.reply(f'O {membro.name} reagiu a menssagem com {reacao.emoji}')
+    await ctx.author.send(f'Insira o comando !sugerir_particular e logo em seguida a sua sugestão.')
 
 @bot.command()
-async def somar(ctx:commands.Context, num1:float, num2:float):
-    await ctx.send(f'A soma entre {num1} e {num2} é {num1 + num2}')
+async def _particular(ctx:commands.Context,* ,sugestao_user):
+    if ctx.guild != None:
+        return
+    sugestao = str(sugestao_user).strip().capitalize()
+    await ctx.send(sugestao)
+
+    await disparar_embed(sugestao = sugestao)
+
+async def disparar_embed(sugestao):
+    embed_sugestao = discord.Embed()
+    embed_sugestao.title = 'Um usuário enviou uma sugestão!'
+    embed_sugestao.description = sugestao
+
+    canal_destino = bot.get_channel(int(canal_sugestao))
+
+    await canal_destino.send(embed = embed_sugestao)
 
 @bot.command()
-async def enviar_embed(ctx:commands.Context):
-    minha_embed = discord.Embed()
-    minha_embed.title = 'Titulo da embed'
-    minha_embed.description = 'Descrição'
+async def _limparc(ctx:commands.Context, quantidade:int = 10):
+    if ctx.guild == None:
+        return
+    await ctx.channel.purge(limit=quantidade + 1)
 
-    imagem = discord.File('Avatar Estude a Mudança.jpg','avatar.jpg')
-    #imagem_avatar = discord.File(f'{membro.avatar}', 'user_avatar.jpg')
-
-    minha_embed.set_image(url='attachment://avatar.jpg')
-    minha_embed.set_thumbnail(url='attachment://avatar.jpg')
-
-    minha_embed.set_footer(text='Esse é o footer da minha embed')
-
-    minha_embed.set_author(name='Wesley', icon_url='https://i.redd.it/dqzgs9lrbx1g1.jpg', url='https://github.com/dablio-dev')
-
-    await ctx.reply(embed = minha_embed, file = imagem)
-
-@tasks.loop(time=time(23, 30))
-async def enviar_mensagem():
-    canal = bot.get_channel(1564782422850277466)
-    await canal.send('Hora de estudar, repetição ativada')
 
 bot.run(token)
