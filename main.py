@@ -34,7 +34,9 @@ async def disparar_embed(sugestao):
     embed_sugestao = discord.Embed()
     embed_sugestao.title = 'Um usuário enviou uma sugestão!'
     embed_sugestao.description = sugestao
-
+    embed_sugestao.set_author(name = 'Suggestion Bot', icon_url ='https://github.com/dablio-dev/Bot-Estude-a-Mudan-a-'
+                                                                 'para-discord/blob/main/Avatar%20Estude%20a%20Mudan%C3'
+                                                                 '%A7a.jpg?raw=true', url='https://github.com/dablio-dev')
     canal_destino = bot.get_channel(int(canal_sugestao))
 
     await canal_destino.send(embed = embed_sugestao)
