@@ -26,14 +26,13 @@ async def on_message(msg):
             sleep(5)
             await msg.delete()
         return
-    if msg.channel.id != canal_sugestao:
-        return
 
-    mensagem = str(msg.content)
-    if not '!sugerir' in mensagem:
-        mensagem_bot = 'Use o prefixo (!sugerir) para requisitar uma sugestão, em caso de duvidas consulte as instruções!'
-        await msg.channel.send(mensagem_bot)
-        await msg.delete()
+    if msg.channel.id == canal_sugestao:
+        mensagem = str(msg.content)
+        if not '!sugerir' in mensagem:
+            mensagem_bot = 'Use o prefixo (!sugerir) para requisitar uma sugestão, em caso de duvidas consulte as instruções!'
+            await msg.channel.send(mensagem_bot)
+            await msg.delete()
     await bot.process_commands(msg)
 
 
@@ -63,13 +62,14 @@ async def disparar_embed(ctx, sugestao):
     canal_destino = bot.get_channel(int(canal_sugestao))
 
     await ctx.send(embed = embed_sugestao)
-    await canal_destino.send(embed = embed_sugestao)
+    mensagem_publicada = await canal_destino.send(embed = embed_sugestao)
+    await mensagem_publicada.add_reaction('✅')
+    await mensagem_publicada.add_reaction('❌')
 
 @bot.command()
 async def _limparc(ctx:commands.Context, quantidade:int = 10):
     if ctx.guild == None:
         return
     await ctx.channel.purge(limit=quantidade + 1)
-
 
 bot.run(token)
